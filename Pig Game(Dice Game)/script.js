@@ -1,7 +1,7 @@
 'use strict';
 
 // Selecting elements
-//getElementBy is faster than querySelector as it is more specific which selector to select.
+
 const player0El = document.querySelector('.player--0');
 const player1El = document.querySelector('.player--1');
 const score0El = document.querySelector('#score--0');
