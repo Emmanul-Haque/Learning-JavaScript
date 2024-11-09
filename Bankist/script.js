@@ -61,6 +61,7 @@ const inputLoanAmount = document.querySelector(".form__input--loan-amount");
 const inputCloseUsername = document.querySelector(".form__input--user");
 const inputClosePin = document.querySelector(".form__input--pin");
 
+// Display Transaction on the page
 const displayMovements = function (movements) {
   containerMovements.textContent = "";
 
@@ -81,3 +82,17 @@ const displayMovements = function (movements) {
 };
 
 displayMovements(account1.movements);
+
+// create username ➡️ Md Emmanul Haque's username = MEH
+const createUsernames = function (accs) {
+  accs.forEach(function (acc) {
+    acc.username = acc.owner
+      .toLowerCase()
+      .split(" ")
+      .map(word => word[0])
+      .join("");
+  });
+};
+
+createUsernames(accounts);
+console.log(accounts);
