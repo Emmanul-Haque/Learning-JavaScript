@@ -83,6 +83,15 @@ const displayMovements = function (movements) {
 
 displayMovements(account1.movements);
 
+// calculate the total transaction and then display balance
+const calcDisplayBalance = function (movements) {
+  const balance = movements.reduce((acc, mov) => acc + mov, 0);
+
+  labelBalance.textContent = `${balance} €`;
+};
+
+calcDisplayBalance(account1.movements);
+
 // create username ➡️ Md Emmanul Haque's username = MEH
 const createUsernames = function (accs) {
   accs.forEach(function (acc) {
@@ -95,4 +104,3 @@ const createUsernames = function (accs) {
 };
 
 createUsernames(accounts);
-console.log(accounts);
