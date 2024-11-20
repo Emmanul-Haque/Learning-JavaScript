@@ -82,10 +82,9 @@ const displayMovements = function (movements) {
 };
 
 // calculate the total transaction and then display balance
-const calcDisplayBalance = function (movements) {
-  const balance = movements.reduce((acc, mov) => acc + mov, 0);
-
-  labelBalance.textContent = `${balance}€`;
+const calcDisplayBalance = function (acc) {
+  acc.balance = acc.movements.reduce((acc, mov) => acc + mov, 0);
+  labelBalance.textContent = `${acc.balance}€`;
 };
 
 // calculate the total incomes, outcome and interest given out by bank
@@ -118,8 +117,18 @@ const createUsernames = function (accs) {
       .join("");
   });
 };
-
 createUsernames(accounts);
+
+const updateUI = function (acc) {
+  // Display Movements
+  displayMovements(acc.movements);
+
+  // Display Balance
+  calcDisplayBalance(acc);
+
+  // Display Summary
+  calcDisplaySummary(acc);
+};
 
 // Implementing Login
 let currentAccount;
@@ -133,23 +142,71 @@ btnLogin.addEventListener("click", function (e) {
   );
 
   if (currentAccount?.pin === Number(inputLoginPin.value)) {
-    // Display UI and Message
+    // Display Message
     labelWelcome.textContent = `Welcome back, ${
       currentAccount.owner.split(" ")[0]
     }`;
+
+    // Display UI
     containerApp.style.opacity = 100;
 
     // Clear input fields
     inputLoginUsername.value = inputLoginPin.value = "";
     inputLoginPin.blur();
 
-    // Display Movements
-    displayMovements(currentAccount.movements);
-
-    // Display Balance
-    calcDisplayBalance(currentAccount.movements);
-
-    // Display Summary
-    calcDisplaySummary(currentAccount);
+    // Updating UI
+    updateUI(currentAccount);
   }
+});
+
+// Implementing Transfer
+btnTransfer.addEventListener("click", function (e) {
+  e.preventDefault();
+
+  const amount = Number(inputTransferAmount.value);
+  const receiverAcc = accounts.find(
+    acc => acc.username === inputTransferTo.value
+  );
+
+  // Clear input fields
+  inputTransferAmount.value = inputTransferTo.value = "";
+  inputTransferAmount.blur();
+
+  // checking pre-conditions before transfer money
+  if (
+    amount > 0 &&
+    receiverAcc &&
+    currentAccount.balance >= amount &&
+    receiverAcc?.username !== currentAccount.username
+  ) {
+    // Transfering money
+    currentAccount.movements.push(-amount);
+    receiverAcc.movements.push(amount);
+
+    // Updating UI
+    updateUI(currentAccount);
+  }
+});
+
+// Implementing Close Account
+btnClose.addEventListener("click", function (e) {
+  e.preventDefault();
+
+  const userName = inputCloseUsername.value;
+  const userPin = Number(inputClosePin.value);
+
+  if (userName === currentAccount.username && userPin === currentAccount.pin) {
+    const index = accounts.findIndex(acc => userName === acc.username);
+
+    console.log(index);
+
+    // Delete account
+    accounts.splice(index, 1);
+
+    // Hide UI
+    containerApp.style.opacity = 0;
+  }
+  // Clear input fields
+  inputCloseUsername.value = inputClosePin.value = "";
+  inputClosePin.blur();
 });
