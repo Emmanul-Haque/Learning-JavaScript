@@ -14,12 +14,12 @@ const account1 = {
   movementsDates: [
     "2022-11-01T13:15:33.035Z",
     "2022-11-30T09:48:16.867Z",
-    "2022-12-25T06:04:23.907Z",
+    "2023-12-25T06:04:23.907Z",
     "2023-01-25T14:18:46.235Z",
     "2023-02-05T16:33:06.386Z",
-    "2023-04-10T14:43:26.374Z",
-    "2024-06-25T18:49:59.371Z",
-    "2024-07-26T12:01:20.894Z",
+    "2024-04-10T14:43:26.374Z",
+    "2024-11-17T18:49:59.371Z",
+    "2024-11-21T12:01:20.894Z",
   ],
   currency: "EUR",
   locale: "pt-PT", // de-DE
@@ -87,6 +87,23 @@ const inputLoanAmount = document.querySelector(".form__input--loan-amount");
 const inputCloseUsername = document.querySelector(".form__input--user");
 const inputClosePin = document.querySelector(".form__input--pin");
 
+const formatMovementsDate = function (date) {
+  const calcDaysPassed = (date1, date2) =>
+    Math.round(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
+
+  const daysPassed = calcDaysPassed(new Date(), date);
+
+  if (daysPassed === 0) return `Today`;
+  if (daysPassed === 1) return `Yesterday`;
+  if (daysPassed <= 7) return `${daysPassed} days ago`;
+
+  const day = `${date.getDate()}`.padStart(2, 0);
+  const month = `${date.getMonth() + 1}`.padStart(2, 0);
+  const year = date.getFullYear();
+
+  return `${day} / ${month} / ${year}`;
+};
+
 // Display Transaction on the page
 const displayMovements = function (acc, sort = false) {
   containerMovements.textContent = "";
@@ -99,10 +116,7 @@ const displayMovements = function (acc, sort = false) {
     const type = mov > 0 ? `deposit` : `withdrawal`;
 
     const date = new Date(acc.movementsDates[i]);
-    const day = `${date.getDate()}`.padStart(2, 0);
-    const month = `${date.getMonth() + 1}`.padStart(2, 0);
-    const year = date.getFullYear();
-    const displayDate = `${day} / ${month} / ${year}`;
+    const displayDate = formatMovementsDate(date);
 
     const html = `
     <div class="movements__row">
