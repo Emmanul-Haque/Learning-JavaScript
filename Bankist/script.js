@@ -22,7 +22,7 @@ const account1 = {
     "2024-11-21T12:01:20.894Z",
   ],
   currency: "EUR",
-  locale: "pt-PT", // de-DE
+  locale: "en-IN", // for India
 };
 
 const account2 = {
@@ -41,8 +41,10 @@ const account2 = {
     "2020-07-11T23:36:17.929Z",
     "2020-07-12T10:51:36.790Z",
   ],
-  currency: "USD",
-  locale: "en-US",
+  currency: "EUR",
+  locale: "pt-PT", // de-DE for portuguese
+  // currency: "USD",
+  // locale: "en-US", // for USA
 };
 
 const account3 = {
@@ -87,7 +89,7 @@ const inputLoanAmount = document.querySelector(".form__input--loan-amount");
 const inputCloseUsername = document.querySelector(".form__input--user");
 const inputClosePin = document.querySelector(".form__input--pin");
 
-const formatMovementsDate = function (date) {
+const formatMovementsDate = function (date, locale) {
   const calcDaysPassed = (date1, date2) =>
     Math.round(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
 
@@ -97,11 +99,12 @@ const formatMovementsDate = function (date) {
   if (daysPassed === 1) return `Yesterday`;
   if (daysPassed <= 7) return `${daysPassed} days ago`;
 
-  const day = `${date.getDate()}`.padStart(2, 0);
-  const month = `${date.getMonth() + 1}`.padStart(2, 0);
-  const year = date.getFullYear();
-
-  return `${day} / ${month} / ${year}`;
+  const options = {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+  };
+  return new Intl.DateTimeFormat(locale, options).format(date);
 };
 
 // Display Transaction on the page
@@ -116,7 +119,7 @@ const displayMovements = function (acc, sort = false) {
     const type = mov > 0 ? `deposit` : `withdrawal`;
 
     const date = new Date(acc.movementsDates[i]);
-    const displayDate = formatMovementsDate(date);
+    const displayDate = formatMovementsDate(date, acc.locale);
 
     const html = `
     <div class="movements__row">
@@ -204,14 +207,23 @@ btnLogin.addEventListener("click", function (e) {
       currentAccount.owner.split(" ")[0]
     }`;
 
-    // Display Current Date
+    // Display Current Date and Time
     const now = new Date();
-    const day = `${now.getDate()}`.padStart(2, 0);
-    const month = `${now.getMonth() + 1}`.padStart(2, 0);
-    const year = now.getFullYear();
-    const hours = `${now.getHours()}`.padStart(2, 0);
-    const min = `${now.getMinutes()}`.padStart(2, 0);
-    labelDate.textContent = `${day} / ${month} / ${year}, ${hours} : ${min}`;
+    const options = {
+      hour: "numeric",
+      minute: "numeric",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      weekday: "long",
+    };
+    const locale = navigator.language;
+    console.log(locale); // Use for formating as per user's country Date and Time
+
+    labelDate.textContent = new Intl.DateTimeFormat(
+      currentAccount.locale,
+      options
+    ).format(now); // Use the code wrtten in the object
 
     // Display UI
     containerApp.style.opacity = 100;
