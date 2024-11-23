@@ -31,3 +31,44 @@ document.addEventListener('keydown', function (e) {
     closeModal();
   }
 });
+
+// Implementing Smooth Scrolling
+
+const btnScrollTo = document.querySelector('.btn--scroll-to');
+const section1 = document.querySelector('#section--1');
+
+btnScrollTo.addEventListener('click', function (e) {
+  // To get co-ordinates according to the rectangle (as our webpages looks like rectangle) getBoundingClientRect(). And this method is relative to the visible viewport.
+  const s1coords = section1.getBoundingClientRect();
+
+  console.log(s1coords);
+
+  console.log(e.target.getBoundingClientRect());
+
+  // current scroll position
+  console.log('Current scroll (X/Y)', window.pageXOffset, window.pageYOffset); // Now deprecated
+
+  // current window position
+  console.log(
+    'height/width viewport',
+    document.documentElement.clientHeight,
+    document.documentElement.clientWidth
+  );
+
+  // Scrolling
+  // 1st way: Old way
+  /*
+  window.scrollTo(
+    s1coords.left + window.pageXOffset,
+    s1coords.top + window.pageYOffset
+  );
+  window.scrollTo({
+    left: s1coords.left + window.pageXOffset,
+    top: s1coords.top + window.pageYOffset,
+    behavior: 'smooth',
+  });
+  */
+
+  // 2nd way: Modern way
+  section1.scrollIntoView({ behavior: 'smooth' });
+});
