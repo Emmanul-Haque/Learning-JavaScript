@@ -21,7 +21,7 @@ const account1 = {
     "2024-11-17T18:49:59.371Z",
     "2024-11-21T12:01:20.894Z",
   ],
-  currency: "EUR",
+  currency: "INR",
   locale: "en-IN", // for India
 };
 
@@ -89,6 +89,9 @@ const inputLoanAmount = document.querySelector(".form__input--loan-amount");
 const inputCloseUsername = document.querySelector(".form__input--user");
 const inputClosePin = document.querySelector(".form__input--pin");
 
+// ----------------------X------Functions------X------------------------
+
+// Formatted date and time according to each country
 const formatMovementsDate = function (date, locale) {
   const calcDaysPassed = (date1, date2) =>
     Math.round(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
@@ -105,6 +108,14 @@ const formatMovementsDate = function (date, locale) {
     year: "2-digit",
   };
   return new Intl.DateTimeFormat(locale, options).format(date);
+};
+
+// Formatted currency according to each country
+const formatCurrency = function (value, locale, currency) {
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: currency,
+  }).format(value);
 };
 
 // Display Transaction on the page
@@ -127,7 +138,11 @@ const displayMovements = function (acc, sort = false) {
       i + 1
     } ${type}</div>
       <div class="movements__date">${displayDate}</div>
-      <div class="movements__value">${mov.toFixed(2)}€</div>
+      <div class="movements__value">${formatCurrency(
+        mov,
+        acc.locale,
+        acc.currency
+      )}</div>
     </div>
     `;
 
@@ -138,7 +153,12 @@ const displayMovements = function (acc, sort = false) {
 // calculate the total transaction and then display balance
 const calcDisplayBalance = function (acc) {
   acc.balance = acc.movements.reduce((acc, mov) => acc + mov, 0);
-  labelBalance.textContent = `${acc.balance.toFixed(2)}€`;
+
+  labelBalance.textContent = `${formatCurrency(
+    acc.balance,
+    acc.locale,
+    acc.currency
+  )}`;
 };
 
 // calculate the total incomes, outcome and interest given out by bank
@@ -146,19 +166,31 @@ const calcDisplaySummary = function (acc) {
   const incomes = acc.movements
     .filter(mov => mov > 0)
     .reduce((acc, deposit) => acc + deposit, 0);
-  labelSumIn.textContent = `${incomes.toFixed(2)}€`;
+  labelSumIn.textContent = `${formatCurrency(
+    incomes,
+    acc.locale,
+    acc.currency
+  )}`;
 
   const outcomes = acc.movements
     .filter(mov => mov < 0)
     .reduce((acc, withdrew) => acc + withdrew, 0);
-  labelSumOut.textContent = `${Math.abs(outcomes).toFixed(2)}€`;
+  labelSumOut.textContent = `${formatCurrency(
+    Math.abs(outcomes),
+    acc.locale,
+    acc.currency
+  )}`;
 
   const interest = acc.movements
     .filter(mov => mov > 0)
     .map(deposit => (deposit * acc.interestRate) / 100)
     .filter(interest => interest >= 1)
     .reduce((acc, interest) => acc + interest, 0);
-  labelSumInterest.textContent = `${interest.toFixed(2)}€`;
+  labelSumInterest.textContent = `${formatCurrency(
+    interest,
+    acc.locale,
+    acc.currency
+  )}`;
 };
 
 // create username ➡️ Md Emmanul Haque's username = MEH
@@ -184,13 +216,39 @@ const updateUI = function (acc) {
   calcDisplaySummary(acc);
 };
 
-// Global variables
-let currentAccount;
+const startLogOutTimer = function () {
+  // make a timer clock
+  const clock = function () {
+    const min = String(Math.trunc(time / 60)).padStart(2, 0);
+    const sec = String(time % 60).padStart(2, 0);
 
-// Fake ALways Logged In
-currentAccount = account1;
-updateUI(currentAccount);
-containerApp.style.opacity = 100;
+    // In each call, show the remaining time to UI
+    labelTimer.textContent = `${min}:${sec}`;
+
+    // when 0 second, stop / reset timer and log out the user
+    if (time === 0) {
+      clearInterval(timer);
+      labelWelcome.textContent = `Log in to get started`;
+      containerApp.style.opacity = 0;
+    }
+
+    //Decrease 1 sec
+    time--;
+  };
+
+  // set time to 5 minutes
+  let time = 300;
+
+  // call the timer clock every second
+  clock();
+  const timer = setInterval(clock, 1000);
+  return timer;
+};
+
+// ----------------------X------BUTTON EVENTS------X------------------------
+
+// Global variables
+let currentAccount, timer;
 
 // Implementing Login
 btnLogin.addEventListener("click", function (e) {
@@ -232,6 +290,10 @@ btnLogin.addEventListener("click", function (e) {
     inputLoginUsername.value = inputLoginPin.value = "";
     inputLoginPin.blur();
 
+    // check if timer exist, if not only then call the timer
+    if (timer) clearInterval(timer);
+    timer = startLogOutTimer();
+
     // Updating UI
     updateUI(currentAccount);
   }
@@ -267,6 +329,10 @@ btnTransfer.addEventListener("click", function (e) {
 
     // Updating UI
     updateUI(currentAccount);
+
+    // Reset the timer
+    clearInterval(timer);
+    timer = startLogOutTimer();
   }
 });
 
@@ -277,14 +343,21 @@ btnLoan.addEventListener("click", function (e) {
   const amount = Math.floor(inputLoanAmount.value);
 
   if (amount > 0 && currentAccount.movements.some(mov => mov >= amount * 0.1)) {
-    // Add movements
-    currentAccount.movements.push(amount);
+    // Bank taking 2.5 sec to approve the loan
+    setTimeout(function () {
+      // Add movements
+      currentAccount.movements.push(amount);
 
-    // Adding loan Data
-    currentAccount.movementsDates.push(new Date().toISOString());
+      // Adding loan Data
+      currentAccount.movementsDates.push(new Date().toISOString());
 
-    // Updating UI
-    updateUI(currentAccount);
+      // Updating UI
+      updateUI(currentAccount);
+
+      // Reset the timer
+      clearInterval(timer);
+      timer = startLogOutTimer();
+    }, 2500);
   }
 
   // Clear input fields
