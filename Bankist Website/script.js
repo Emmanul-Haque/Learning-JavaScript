@@ -24,6 +24,8 @@ const header = document.querySelector('.header');
 
 const allSections = document.querySelectorAll('.section');
 
+const imgTargets = document.querySelectorAll('img[data-src]'); // selecting element based on their attribute. Here element (img) & attribute (data-src).
+
 ///////////////////////////////////////
 // Modal window
 
@@ -184,3 +186,111 @@ allSections.forEach(function (section) {
   sectionsObserver.observe(section);
   section.classList.add('section--hidden');
 });
+
+///////////////////////////////////////
+//Lazy loading images
+const loadImg = function (entries, observer) {
+  const [entry] = entries;
+  console.log(entry);
+  if (!entry.isIntersecting) return;
+
+  // Replace src with data-src
+  entry.target.src = entry.target.dataset.src;
+  // entry.target.classList.remove('lazy-img'); // -> this will work on devices with highspeed internet but will be problem for low speed internet user.
+
+  entry.target.addEventListener('load', function () {
+    entry.target.classList.remove('lazy-img');
+  });
+
+  observer.unobserve(entry.target);
+};
+
+const imgObserver = new IntersectionObserver(loadImg, {
+  root: null,
+  threshold: 0,
+  rootMargin: '8px',
+});
+imgTargets.forEach(img => imgObserver.observe(img));
+
+///////////////////////////////////////
+//Slider
+const slider = function () {
+  const slides = document.querySelectorAll('.slide');
+  const btnLeft = document.querySelector('.slider__btn--left');
+  const btnRight = document.querySelector('.slider__btn--right');
+  const dotContainer = document.querySelector('.dots');
+
+  let currSlide = 0;
+  const maxSlide = slides.length;
+
+  // function to create the dots
+  const createDots = function () {
+    slides.forEach(function (_, i) {
+      dotContainer.insertAdjacentHTML(
+        'beforeend',
+        `<button class="dots__dot" data-slide="${i}"></button>`
+      );
+    });
+  };
+
+  // function that indicates which slide is active through dots
+  const activateDot = function (slide) {
+    document
+      .querySelectorAll('.dots__dot')
+      .forEach(dot => dot.classList.remove('dots__dot--active'));
+    document
+      .querySelector(`.dots__dot[data-slide="${slide}"]`)
+      .classList.add('dots__dot--active');
+  };
+
+  // function to change the slides
+  const goToSlide = function (slide) {
+    slides.forEach(
+      (s, i) => (s.style.transform = `translateX(${100 * (i - slide)}%)`)
+    );
+  };
+
+  // Initial State or Starting Position
+  const init = function () {
+    goToSlide(0);
+    createDots();
+    activateDot(0);
+  };
+  init();
+
+  //To go to next slide using right btn click
+  const nextSlide = function () {
+    if (currSlide === maxSlide - 1) currSlide = 0;
+    else currSlide++;
+
+    goToSlide(currSlide);
+    activateDot(currSlide);
+  };
+
+  btnRight.addEventListener('click', nextSlide);
+
+  //To go to previous slide using left btn click
+  const prevSlide = function () {
+    if (currSlide === 0) currSlide = maxSlide - 1;
+    else currSlide--;
+    goToSlide(currSlide);
+    activateDot(currSlide);
+  };
+  btnLeft.addEventListener('click', prevSlide);
+
+  // Handeling keyboard (right & left keys) event for slider
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') prevSlide();
+    e.key === 'ArrowRight' && nextSlide();
+  });
+
+  //To go to each slide using dots click
+  dotContainer.addEventListener('click', function (e) {
+    if (e.target.classList.contains('dots__dot')) {
+      const { slide } = e.target.dataset;
+      goToSlide(slide);
+      activateDot(slide);
+    }
+  });
+};
+slider();
