@@ -10,6 +10,7 @@ const account1 = {
   movements: [200, 455.23, -306.5, 25000, -642.21, -133.9, 79.97, 1300],
   interestRate: 1.2, // %
   pin: 9090,
+  type: "premium",
 
   movementsDates: [
     "2022-11-01T13:15:33.035Z",
@@ -30,6 +31,7 @@ const account2 = {
   movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
   interestRate: 1.5,
   pin: 2222,
+  type: "premium",
 
   movementsDates: [
     "2019-11-18T21:31:17.178Z",
@@ -52,6 +54,7 @@ const account3 = {
   movements: [200, -200, 340, -300, -20, 50, 400, -460],
   interestRate: 0.7,
   pin: 3333,
+  type: "standard",
 };
 
 const account4 = {
@@ -59,6 +62,7 @@ const account4 = {
   movements: [430, 1000, 700, 50, 90],
   interestRate: 1,
   pin: 4444,
+  type: "basic",
 };
 
 const accounts = [account1, account2, account3, account4];
@@ -244,6 +248,11 @@ const startLogOutTimer = function () {
   const timer = setInterval(clock, 1000);
   return timer;
 };
+
+// Trying New Feature in JS Group-By
+// const groupedAccounts = Object.groupBy(accounts, acc => acc.type); -> Old Way
+const groupedAccounts = Object.groupBy(accounts, ({ type }) => type); // -> New Way
+console.log(groupedAccounts);
 
 // ----------------------X------BUTTON EVENTS------X------------------------
 
