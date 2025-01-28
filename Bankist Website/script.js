@@ -117,7 +117,7 @@ navLinks.addEventListener('click', function (e) {
 tabsContainer.addEventListener('click', function (e) {
   const clicked = e.target.closest('.operations__tab');
 
-  // Gaurd Clause
+  // Guard Clause
   if (!clicked) return;
 
   // -> First removing the existing active class
